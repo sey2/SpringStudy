@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th ="http://www.thymeleaf.org">
+
+<!-- this는 현재 페이지 의미를 사용하는데 생략 가능
+     exLayout2.html에는 화면 구성과 관련된 기능이 없음
+     target을 사용해 파라미터 2개를 fragment3으로 전달
+
+ !-->
+<th:block th:replace="~{/fragments/fragment3::target(~{this:: #ulFirst}, ~{this:: #ulSecond})}">
+
+  <ul id ="ulFirst">
+    <li>AAA</li>
+    <li>BBB</li>
+    <li>CCC</li>
+  </ul>
+
+  <ul id="ulSecond">
+    <li>111</li>
+    <li>222</li>
+    <li>333</li>
+  </ul>
+
+</th:block>

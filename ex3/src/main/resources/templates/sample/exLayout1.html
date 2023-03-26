@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" xmlns:th = "http://www.thymeleaf.org">
+    <title>Title</title>
+</head>
+
+<body>
+  <h1>Fragment1 Test</h1>
+  <div style ="border: 1px solid blue"></div>
+
+  <th:block th:replace="~{fragments/fragment2}"></th:block>
+
+  <h1>Layout 1 - 1</h1>
+  <div th:replace="~{/fragments/fragment1 :: part1}"></div>
+
+  <h1>Layout 2 - 2</h1>
+  <div th:insert="~{/fragments/fragment1 :: part2}"></div>
+
+  <h1>Layout 3 - 3</h1>
+  <th:block th:replace="~{fragments/fragment1 :: part3}"> </th:block>
+</body>
+
+
+</html>
