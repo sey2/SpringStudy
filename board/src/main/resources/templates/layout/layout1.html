@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="setContent(content)">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+
+  <style>
+    *{
+      margin: 0;
+      padding: 0;
+    }
+    .header{
+      width: 100vw;
+      height: 20vh;
+      background-color:aqua;
+    }
+    .content{
+        width: 100vw;
+        height: 70vh;
+        background-color: lightgray;
+    }
+    .footer{
+        width: 100vw;
+        height: 10vh;
+        background-color: green;
+    }
+  </style>
+
+    <div class="header">
+        <h1>HEADER</h1>
+    </div>
+
+   <!-- content 영역이 다른 내용으로 변경되어야 하기 때문에 content영역은 하나의 템플릿으로 만들고 th:block을 통해 불러옴 -->
+    <div class="content">
+        <th:block th:replace ="${content}">
+        </th:block>
+    </div>
+
+    <div class="footer">
+        <h1>FOTTER</h1>
+    </div>
+
+</body>
+</th:block>
+</html>
