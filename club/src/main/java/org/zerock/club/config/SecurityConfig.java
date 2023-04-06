@@ -4,11 +4,17 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.zerock.club.security.filter.ApiCheckFilter;
+import org.zerock.club.security.filter.ApiLoginFilter;
+import org.zerock.club.security.handler.ApiLoginFailHandler;
 import org.zerock.club.security.handler.ClubLoginSuccessHandler;
 import org.zerock.club.security.service.ClubUserDetailsService;
 
@@ -71,6 +77,12 @@ public class SecurityConfig {
 //            auth.requestMatchers("/sample/member").hasRole("USER");
 //        });
 
+       AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+       authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+
+       AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
+       http.authenticationManager(authenticationManager);
+
         http.formLogin(); // 인가 인증에 문제시 로그인 화면 띄우기 (유저 권한인데 관리자 페이지에 접속 시도하거나 그럴 때)
         http.csrf().disable();  // CSRF 토큰 발행하지 않음 설정
        //  http.logout();  // 인가 인증에 문제시 로그아웃 화면 띄우기, CSRF 토큰을 사용할 때는 반드시 POST 방식으로만 로그아웃 처리해야함
@@ -86,11 +98,32 @@ public class SecurityConfig {
                 .tokenValiditySeconds(60*60*24*7)   // 얼마나 유지할지 <- 해당 코드는 7일간 유지
                 .userDetailsService(userDetailsService);
 
+        // API Check Filter 동작 순서를 UsernamePasswordAuthenticationFilter 이전에 실행
+        http.addFilterBefore(apiCheckFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        http.addFilterBefore(apiLoginFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
    }
 
-   @Bean
+    @Bean
     public ClubLoginSuccessHandler successHandler(){
        return new ClubLoginSuccessHandler(passwordEncoder());
+   }
+
+    @Bean
+    public ApiCheckFilter apiCheckFilter(){
+       // notes에서만 Token Check
+       return new ApiCheckFilter("/notes/**/*");
+   }
+
+   public ApiLoginFilter apiLoginFilter(AuthenticationManager authenticationManager) throws  Exception{
+       // 해당 경로로 접근할 때 동작 하도록 지정
+       ApiLoginFilter apiLoginFilter = new ApiLoginFilter("/api/login");
+       apiLoginFilter.setAuthenticationManager(authenticationManager);
+
+       apiLoginFilter.setAuthenticationFailureHandler(new ApiLoginFailHandler());
+
+       return apiLoginFilter;
    }
 }
